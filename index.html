@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小狗算数 · 全家赛跑</title>
+<style>
+:root{--sky1:#8fd3ff;--sky2:#e9f7ff;--hill:#9be083;--ground:#6cc55a;--ground2:#58ad48;--card:#fffdf6;--ink:#27406b;--btn:#ffd45c;--btn-ink:#5a3b00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600}}
+:root[data-theme="dark"]{--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600}
+html,body{min-height:100%;margin:0}
+body{background:var(--sky2);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;overflow-x:hidden}
+.top{width:min(94vw,640px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:18px;font-weight:800}
+.top span{background:var(--card);border-radius:16px;padding:4px 12px}
+.stage{width:min(94vw,640px);box-sizing:border-box;padding:34px 14px 14px;border-radius:30px;background:linear-gradient(var(--sky1),var(--sky2));display:flex;flex-direction:column;gap:30px}
+.lane{position:relative;height:92px;border-radius:24px;background:var(--ground);border-bottom:6px solid var(--ground2)}
+.lane:nth-child(even){background:var(--hill)}
+.lane.now{box-shadow:0 0 0 4px var(--btn)}
+.tag{position:absolute;left:8px;top:-22px;font-size:15px;font-weight:800;background:var(--card);border-radius:12px;padding:1px 10px;z-index:5}
+.dog{position:absolute;left:10px;bottom:6px;width:96px;transition:left .75s ease-in-out;z-index:3}
+.dog svg{display:block;width:100%;height:auto;overflow:visible}
+.paw{position:absolute;bottom:14px;font-size:15px;opacity:.45;z-index:2;transform:rotate(90deg)}
+.bone{position:absolute;right:10px;bottom:24px;width:52px;height:23px;z-index:2;transform-origin:0 50%;animation:bob 1.8s ease-in-out infinite alternate}
+.bone svg{width:100%;height:100%}
+@keyframes bob{to{transform:translateY(-5px) rotate(-6deg)}}
+.bone.eaten{animation:eaten 1.8s ease-in forwards}
+@keyframes eaten{0%{transform:scale(1)}25%{transform:scale(.8) rotate(-6deg)}55%{transform:scale(.55) rotate(5deg)}85%{transform:scale(.25)}100%{transform:scale(0)}}
+.tail{transform-origin:26px 54px;animation:wag .5s ease-in-out infinite alternate}
+@keyframes wag{from{transform:rotate(-14deg)}to{transform:rotate(18deg)}}
+.leg{transform-box:fill-box;transform-origin:50% 8%}
+.run .la{animation:swing .26s ease-in-out infinite alternate}
+.run .lb{animation:swing .26s ease-in-out infinite alternate-reverse}
+@keyframes swing{from{transform:rotate(-32deg)}to{transform:rotate(32deg)}}
+.run svg{animation:hop .26s ease-in-out infinite alternate}
+@keyframes hop{to{transform:translateY(-6px)}}
+.run .tail{animation-duration:.2s}
+.head{transform-origin:90px 58px}
+.eat .head{animation:chomp .42s ease-in-out infinite alternate}
+@keyframes chomp{from{transform:rotate(4deg)}to{transform:rotate(17deg)}}
+.oops .head{animation:nope .4s}
+@keyframes nope{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.bub{position:absolute;right:4px;top:-26px;background:#fff;color:#27406b;font-weight:800;font-size:17px;padding:1px 10px;border-radius:12px;opacity:0;transform:scale(.4)}
+.bub.say{animation:pop .9s ease-out}
+@keyframes pop{15%{opacity:1;transform:scale(1.1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.heart{position:absolute;bottom:50px;font-size:24px;z-index:6;animation:fly 1.3s ease-out forwards}
+@keyframes fly{to{transform:translateY(-80px);opacity:0}}
+.card{background:var(--card);border-radius:28px;padding:18px 24px 20px;width:min(94vw,640px);box-sizing:border-box;text-align:center}
+.who{font-size:26px;font-weight:800;margin-bottom:4px}
+.q{font-size:52px;font-weight:800;margin:2px 0 14px;letter-spacing:2px}
+.opts{display:flex;gap:12px}
+button{font-family:inherit;cursor:pointer}
+.opts button{flex:1;font-size:38px;font-weight:800;padding:12px 0;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink);box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.opts button:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+button:focus-visible,input:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+.msg{min-height:28px;font-size:21px;font-weight:700;margin-top:12px}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.big{font-size:28px;font-weight:800;line-height:1.5}
+.btn{margin:8px 6px 0;font-size:24px;font-weight:800;padding:12px 26px;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink)}
+.row{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:34px;justify-content:center}
+.row input[type=checkbox]{width:26px;height:26px}
+.row input[type=text]{font-size:22px;width:150px;padding:8px 12px;border-radius:14px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-family:inherit}
+.hide{display:none}
+@media (max-width:480px){.q{font-size:42px}.opts button{font-size:32px}.row input[type=text]{width:120px}}
+@media (prefers-reduced-motion:reduce){.bone,.tail{animation:none}.dog{transition:none}}
+</style>
+</head>
+<body>
+<div class="top" id="top"></div>
+<div class="card" id="setup">
+  <div class="big">谁来玩?</div>
+  <div id="rows"></div>
+  <div class="msg" id="smsg"></div>
+  <button class="btn" id="start">开始赛跑</button>
+</div>
+<div class="stage hide" id="stage"></div>
+<div class="card hide" id="play">
+  <div class="who" id="who"></div>
+  <div class="q" id="q"></div>
+  <div class="opts" id="opts"></div>
+  <div class="msg" id="msg"></div>
+</div>
+<div class="card big hide" id="win"><span id="wtext"></span><br><button class="btn" id="again">再来一局</button><button class="btn" id="back">换人 / 改名</button></div>
+<script>
+var $=function(i){return document.getElementById(i)};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+var HUES=[0,180,300,100];
+var ROWS=[['👨','爸爸',1],['👩','妈妈',1],['🧒','宝宝',1],['👧','姐姐',0]];
+var DOG='<div class="bub">汪!</div><svg viewBox="0 0 140 110"><g class="tail"><path d="M26 54 Q6 46 12 26" fill="none" stroke="#c98a4b" stroke-width="10" stroke-linecap="round"/></g>'+
+'<g class="leg la"><rect x="30" y="68" width="13" height="26" rx="6.5" fill="#a96d35"/><ellipse cx="36.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
+'<g class="leg lb"><rect x="90" y="68" width="13" height="26" rx="6.5" fill="#a96d35"/><ellipse cx="96.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
+'<ellipse cx="64" cy="58" rx="44" ry="27" fill="#e0a458"/><ellipse cx="64" cy="72" rx="28" ry="10" fill="#f6dcae"/>'+
+'<g class="leg lb"><rect x="44" y="68" width="13" height="26" rx="6.5" fill="#c98a4b"/><ellipse cx="50.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
+'<g class="leg la"><rect x="76" y="68" width="13" height="26" rx="6.5" fill="#c98a4b"/><ellipse cx="82.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
+'<g class="head"><circle cx="104" cy="40" r="24" fill="#e0a458"/><ellipse cx="90" cy="38" rx="9" ry="17" transform="rotate(12 90 38)" fill="#8a5a2b"/><ellipse cx="121" cy="48" rx="15" ry="11" fill="#f6dcae"/><ellipse cx="133" cy="44" rx="5" ry="4" fill="#3a2a22"/><circle cx="110" cy="34" r="4" fill="#2b2020"/><circle cx="111.2" cy="32.8" r="1.3" fill="#fff"/><circle cx="112" cy="50" r="4" fill="#ffb3a7" opacity=".6"/><path d="M118 54 Q124 58 130 53" fill="none" stroke="#3a2a22" stroke-width="2" stroke-linecap="round"/><path d="M122 56 q3 8 6 0z" fill="#ff7f9a"/></g></svg>';
+var BONE='<svg viewBox="0 0 64 28"><g fill="#fff6e0" stroke="#d2ab74" stroke-width="2"><circle cx="10" cy="8" r="7"/><circle cx="10" cy="20" r="7"/><circle cx="54" cy="8" r="7"/><circle cx="54" cy="20" r="7"/></g><rect x="10" y="6" width="44" height="16" fill="#fff6e0"/></svg>';
+var saved={names:{},bones:{}};
+try{var s=JSON.parse(localStorage.getItem('puppyMathFamily')||'null');if(s)saved=s}catch(e){}
+function save(){try{localStorage.setItem('puppyMathFamily',JSON.stringify(saved))}catch(e){}}
+var players=[],turn=0,ans=0,locked=true,over=false;
+
+function buildSetup(){
+  var r=$('rows');r.innerHTML='';
+  ROWS.forEach(function(row,i){
+    var d=document.createElement('div');d.className='row';
+    var c=document.createElement('input');c.type='checkbox';c.checked=saved.on&&saved.on[i]!==undefined?!!saved.on[i]:!!row[2];
+    c.setAttribute('aria-label','参加');
+    var e=document.createElement('span');e.textContent=row[0];
+    var t=document.createElement('input');t.type='text';t.maxLength=6;t.value=(saved.names&&saved.names[i])||row[1];
+    d.appendChild(c);d.appendChild(e);d.appendChild(t);r.appendChild(d);
+  });
+}
+function show(id,on){$(id).classList.toggle('hide',!on)}
+function startGame(){
+  var rows=$('rows').children,list=[],on={},names={};
+  for(var i=0;i<rows.length;i++){
+    var cb=rows[i].children[0],tx=rows[i].children[2];
+    on[i]=cb.checked?1:0;names[i]=tx.value||ROWS[i][1];
+    if(cb.checked)list.push({idx:i,emoji:ROWS[i][0],name:tx.value.trim()||ROWS[i][1],hue:HUES[i]});
+  }
+  if(!list.length){$('smsg').textContent='至少选一个人哦';return}
+  saved.on=on;saved.names=names;
+  players=list.map(function(p){p.step=0;p.bones=saved.bones[p.name]||0;return p});
+  $('smsg').textContent='';
+  buildStage();show('setup',false);show('stage',true);show('play',true);show('win',false);
+  turn=0;over=false;renderTop();nextQ();
+}
+function buildStage(){
+  var st=$('stage');st.innerHTML='';
+  players.forEach(function(p){
+    var lane=document.createElement('div');lane.className='lane';
+    var tag=document.createElement('div');tag.className='tag';
+    var bone=document.createElement('div');bone.className='bone';bone.innerHTML=BONE;
+    var dog=document.createElement('div');dog.className='dog';dog.innerHTML=DOG;
+    dog.firstChild.nextSibling.style.filter='hue-rotate('+p.hue+'deg)';
+    lane.appendChild(tag);lane.appendChild(bone);lane.appendChild(dog);st.appendChild(lane);
+    p.lane=lane;p.tag=tag;p.bone=bone;p.dog=dog;p.bub=dog.firstChild;
+    setTag(p);
+  });
+  place(false);
+}
+function setTag(p){p.tag.textContent=p.emoji+' '+p.name+'  '+p.step+'/10'}
+function dogLeft(p,s){
+  var maxL=p.lane.clientWidth-p.dog.offsetWidth-52-18;
+  return 10+(maxL-10)*s/10;
+}
+function place(anim){
+  players.forEach(function(p){
+    if(!anim)p.dog.style.transition='none';
+    p.dog.style.left=dogLeft(p,p.step)+'px';
+    if(!anim){void p.dog.offsetWidth;p.dog.style.transition=''}
+  });
+}
+function renderTop(){
+  var t=$('top');t.innerHTML='';
+  players.forEach(function(p){
+    var s=document.createElement('span');s.textContent=p.emoji+' '+p.name+' 🦴 '+p.bones;t.appendChild(s);
+  });
+}
+function nextQ(){
+  var p=players[turn];
+  players.forEach(function(q,i){q.lane.classList.toggle('now',i===turn)});
+  $('who').textContent=p.emoji+' '+p.name+' 的回合';
+  $('msg').textContent=players.length>1?'答对了,你的小狗就往前跑!':'答对了,小狗就往前跑!';
+  var a,b;
+  if(Math.random()<.5){a=rnd(1,49);b=rnd(1,50-a);ans=a+b;$('q').textContent=a+' + '+b+' = ?'}
+  else{a=rnd(2,50);b=rnd(1,a-1);ans=a-b;$('q').textContent=a+' − '+b+' = ?'}
+  var set=[ans];
+  while(set.length<3){var w=ans+rnd(-6,6);if(w>=0&&w<=50&&set.indexOf(w)<0)set.push(w)}
+  set.sort(function(){return Math.random()-.5});
+  var o=$('opts');o.innerHTML='';
+  set.forEach(function(n){
+    var bt=document.createElement('button');bt.textContent=n;
+    bt.onclick=function(){pick(n,bt)};o.appendChild(bt);
+  });
+  locked=false;
+}
+function addPaw(p){
+  var e=document.createElement('span');e.className='paw';e.textContent='🐾';
+  e.style.left=(p.dog.offsetLeft+16)+'px';p.lane.appendChild(e);
+}
+function say(p){var b=p.bub;b.classList.remove('say');void b.offsetWidth;b.classList.add('say')}
+function advance(){
+  turn=(turn+1)%players.length;nextQ();
+}
+function pick(n,bt){
+  if(locked)return;
+  var p=players[turn];locked=true;
+  if(n===ans){
+    $('msg').textContent='答对啦!'+p.name+'的小狗出发 🐕';
+    addPaw(p);p.step++;setTag(p);
+    p.dog.classList.add('run');p.dog.style.left=dogLeft(p,p.step)+'px';
+    setTimeout(function(){
+      p.dog.classList.remove('run');say(p);
+      if(p.step>=10)finish(p);else setTimeout(advance,350);
+    },780);
+  }else{
+    $('msg').textContent='答错啦,换下一位!';
+    bt.classList.remove('shake');void bt.offsetWidth;bt.classList.add('shake');
+    p.dog.classList.remove('oops');void p.dog.offsetWidth;p.dog.classList.add('oops');
+    setTimeout(advance,1100);
+  }
+}
+function finish(p){
+  over=true;show('play',false);
+  p.dog.classList.add('eat');p.bone.classList.add('eaten');
+  for(var i=0;i<6;i++)(function(i){
+    setTimeout(function(){
+      var h=document.createElement('span');h.className='heart';h.textContent='❤️';
+      h.style.left=(p.dog.offsetLeft+p.dog.offsetWidth*0.5+rnd(-10,40))+'px';
+      h.onanimationend=function(){h.remove()};p.lane.appendChild(h);
+    },i*220);
+  })(i);
+  setTimeout(function(){
+    p.dog.classList.remove('eat');
+    p.bones++;saved.bones[p.name]=p.bones;save();renderTop();
+    $('wtext').textContent=players.length>1?'🎉 '+p.emoji+' '+p.name+' 赢啦!小狗吃到了骨头!':'🎉 太棒啦!小狗吃到了骨头!';
+    show('win',true);
+  },1900);
+}
+$('start').onclick=startGame;
+$('again').onclick=function(){
+  players.forEach(function(p){
+    p.step=0;setTag(p);p.bone.classList.remove('eaten');
+    Array.prototype.slice.call(p.lane.querySelectorAll('.paw')).forEach(function(e){e.remove()});
+  });
+  place(false);show('win',false);show('play',true);turn=0;over=false;nextQ();
+};
+$('back').onclick=function(){
+  show('stage',false);show('play',false);show('win',false);show('setup',true);
+  $('top').innerHTML='';buildSetup();
+};
+window.addEventListener('resize',function(){if(players.length&&!$('stage').classList.contains('hide'))place(false)});
+buildSetup();
+</script>
+</body>
+</html>
