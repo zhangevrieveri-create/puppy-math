@@ -318,7 +318,65 @@ function tone(freq,dur){
   }catch(e){}
 }
 function beep(ok){tone(ok?740:196,ok?0.14:0.22)}
-function cheer(){tone(523,0.12);setTimeout(function(){tone(659,0.12)},120);setTimeout(function(){tone(784,0.18)},240)}
+function winSfx(){tone(523,0.12);setTimeout(function(){tone(659,0.12)},110);setTimeout(function(){tone(784,0.14)},220);setTimeout(function(){tone(1046,0.22)},330)}
+function loseSfx(){tone(392,0.16);setTimeout(function(){tone(330,0.16)},150);setTimeout(function(){tone(262,0.18)},300);setTimeout(function(){tone(196,0.28)},460)}
+function tieSfx(){tone(440,0.14);setTimeout(function(){tone(494,0.18)},160)}
+var bgm=null,bgmWanted=false,duckTimer=null;
+function ensureBgm(){
+  if(bgm)return bgm;
+  bgm=new Audio('audio/bgm.mp3');
+  bgm.loop=true;
+  bgm.volume=0.32;
+  bgm.preload='auto';
+  return bgm;
+}
+function startBgm(){
+  bgmWanted=true;
+  var a=ensureBgm();
+  if(a.paused){var p=a.play();if(p&&p.catch)p.catch(function(){})}
+  if(!duckTimer)a.volume=0.32;
+}
+function stopBgm(){
+  bgmWanted=false;
+  if(!bgm)return;
+  bgm.pause();
+}
+function duckBgm(){
+  if(bgm)bgm.volume=0.08;
+  clearTimeout(duckTimer);
+  duckTimer=setTimeout(restoreBgm,4500);
+}
+function restoreBgm(){
+  clearTimeout(duckTimer);duckTimer=null;
+  if(bgm&&bgmWanted)bgm.volume=0.32;
+}
+function zhVoice(){
+  if(!window.speechSynthesis)return null;
+  var list=speechSynthesis.getVoices(),i,v,lang;
+  for(i=0;i<list.length;i++){
+    v=list[i];lang=(v.lang||'').toLowerCase();
+    if(lang.indexOf('zh')===0)return v;
+  }
+  return null;
+}
+function speak(text){
+  duckBgm();
+  if(!window.speechSynthesis){setTimeout(restoreBgm,900);return}
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='zh-CN';u.rate=1.02;u.pitch=1.12;
+  var voice=zhVoice();if(voice)u.voice=voice;
+  u.onend=restoreBgm;u.onerror=restoreBgm;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+function resultVoice(kind,line){
+  duckBgm();
+  if(kind==='win')winSfx();
+  else if(kind==='lose')loseSfx();
+  else tieSfx();
+  setTimeout(function(){if(!over)return;speak(line)},kind==='lose'?720:520);
+}
+if(window.speechSynthesis)speechSynthesis.getVoices();
 function show(id,on){$(id).classList.toggle('hide',!on)}
 function showHUD(on){$('topbar').classList.toggle('hide',!on);$('rule').classList.toggle('hide',!on);$('quit').classList.toggle('hide',!on)}
 function clearTimers(){clearInterval(qTimer);clearInterval(matchTimer);qTimer=matchTimer=null}
@@ -568,7 +626,8 @@ function burst(parent,x){
   })(i);
 }
 function celebrate(p){
-  cheer();
+  duckBgm();
+  winSfx();
   if(settings.mode==='pong'){
     pongHit();
     var table=document.querySelector('.table');
@@ -596,6 +655,7 @@ function finishWin(p){
   else if(settings.mode==='pong')text=who+' 赢啦!球都打回去了!';
   else text=who+' 赢啦!小狗吃到了骨头!';
   showWin('🎉 '+text);
+  speak(players.length<2?'太棒啦':'赢啦');
 }
 function leaders(){
   var best=-1,list=[],i;
@@ -609,17 +669,21 @@ function timeUp(){
   if(over)return;
   over=true;clearTimers();locked=true;
   var lead=leaders(),text;
-  if(lead.best<=0)text='时间到，还没人得分。再试一次吧!';
+  var kind='win',line='赢啦';
+  if(lead.best<=0){kind='lose';line='失败了，再试一次';text='时间到，还没人得分。再试一次吧!'}
   else if(players.length<2){
     var unit=settings.mode==='plane'?'架':settings.mode==='pong'?'个球':'步';
     text='时间到，你完成了 '+lead.best+' '+unit+'!';
+    line='完成啦';
   }else if(lead.list.length>1){
+    kind='tie';line='平局';
     text='时间到，'+lead.list.map(function(p){return p.emoji+' '+p.name}).join('、')+' 打成平局!';
   }else{
     giveStar(lead.list[0]);
     text='时间到，'+lead.list[0].emoji+' '+lead.list[0].name+' 领先!';
   }
   showWin('⏰ '+text);
+  resultVoice(kind,line);
 }
 function showWin(text){$('wtext').textContent=text;show('play',false);show('win',true)}
 function buildStage(){
@@ -685,14 +749,19 @@ function startGame(){
   players=list.map(function(p){p.step=0;p.stars=saved.stars[p.name]||0;return p});
   turn=0;over=false;locked=true;
   show('setup',false);show('win',false);show('play',true);show('stage',true);showHUD(true);
-  buildStage();renderTop();renderRule();startMatch();nextQ();
+  buildStage();renderTop();renderRule();startBgm();startMatch();nextQ();
 }
 function again(){
   clearTimers();over=false;locked=true;turn=0;lastPrompt='';
-  resetRound();show('win',false);show('play',true);renderTop();startMatch();nextQ();
+  if(window.speechSynthesis)speechSynthesis.cancel();
+  restoreBgm();
+  resetRound();show('win',false);show('play',true);renderTop();startBgm();startMatch();nextQ();
 }
 function back(){
   clearTimers();over=true;locked=true;players=[];
+  stopBgm();
+  if(window.speechSynthesis)speechSynthesis.cancel();
+  restoreBgm();
   show('stage',false);show('play',false);show('win',false);showHUD(false);
   $('top').innerHTML='';show('setup',true);buildSetup();
 }
