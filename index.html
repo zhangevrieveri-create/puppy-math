@@ -3,90 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>小狗算数 · 全家赛跑</title>
 <style>
-:root{--sky1:#8fd3ff;--sky2:#e9f7ff;--hill:#9be083;--ground:#6cc55a;--ground2:#58ad48;--card:#fffdf6;--ink:#27406b;--btn:#ffd45c;--btn-ink:#5a3b00;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600}}
-:root[data-theme="dark"]{--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600}
+:root{--sky1:#8fd3ff;--sky2:#e9f7ff;--hill:#9be083;--ground:#6cc55a;--ground2:#58ad48;--card:#fffdf6;--ink:#27406b;--btn:#ffd45c;--btn-ink:#5a3b00;--ok:#8fd98a;--bad:#ffb4b4;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600;--ok:#3f8a4a;--bad:#8a3a3a}}
+:root[data-theme="dark"]{--sky1:#17294a;--sky2:#35507e;--hill:#3f8a3a;--ground:#2f7a2d;--ground2:#266524;--card:#22314d;--ink:#eaf2ff;--btn:#e8b93f;--btn-ink:#3a2600;--ok:#3f8a4a;--bad:#8a3a3a}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
 html,body{min-height:100%;margin:0}
-body{background:var(--sky2);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;overflow-x:hidden}
-.top{width:min(94vw,640px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:18px;font-weight:800}
+body{background:var(--sky2);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));overflow-x:hidden}
+button,input{font-family:inherit}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+.topbar{width:min(94vw,640px);display:flex;flex-direction:column;align-items:center;gap:8px}
+.clock{font-size:28px;font-weight:800;background:var(--card);border-radius:16px;padding:4px 16px;font-variant-numeric:tabular-nums}
+.clock.danger{background:#ffd0d0;color:#8d1212}
+.top{width:100%;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:16px;font-weight:800}
 .top span{background:var(--card);border-radius:16px;padding:4px 12px}
-.stage{width:min(94vw,640px);box-sizing:border-box;padding:34px 14px 14px;border-radius:30px;background:linear-gradient(var(--sky1),var(--sky2));display:flex;flex-direction:column;gap:30px}
-.lane{position:relative;height:92px;border-radius:24px;background:var(--ground);border-bottom:6px solid var(--ground2)}
+.rule{width:min(94vw,640px);text-align:center;font-size:15px;font-weight:800;line-height:1.45}
+.linkbtn{border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:800;padding:0}
+.stage{width:min(94vw,640px);position:relative;padding:34px 14px 14px;border-radius:30px;background:linear-gradient(var(--sky1),var(--sky2));display:flex;flex-direction:column;gap:26px}
+.stage.plane{--sky1:#6ec8ff;--sky2:#e7f6ff}
+.stage.pong{--sky1:#1f8a4c;--sky2:#8fd9a8;padding:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage.plane{--sky1:#1a3f6c;--sky2:#2d5a8a}:root:not([data-theme="light"]) .stage.pong{--sky1:#145c36;--sky2:#1f7a48}}
+:root[data-theme="dark"] .stage.plane{--sky1:#1a3f6c;--sky2:#2d5a8a}
+:root[data-theme="dark"] .stage.pong{--sky1:#145c36;--sky2:#1f7a48}
+.lane{position:relative;height:84px;border-radius:24px;background:var(--ground);border-bottom:6px solid var(--ground2);z-index:1}
 .lane:nth-child(even){background:var(--hill)}
+.lane.plane{background:rgba(255,255,255,.35);border-bottom-color:rgba(255,255,255,.45)}
 .lane.now{box-shadow:0 0 0 4px var(--btn)}
 .tag{position:absolute;left:8px;top:-22px;font-size:15px;font-weight:800;background:var(--card);border-radius:12px;padding:1px 10px;z-index:5}
-.dog{position:absolute;left:10px;bottom:6px;width:96px;transition:left .75s ease-in-out;z-index:3}
-.dog svg{display:block;width:100%;height:auto;overflow:visible}
+.actor{position:absolute;left:10px;bottom:6px;width:96px;transition:left .75s ease-in-out;z-index:3}
+.actor svg{display:block;width:100%;height:auto;overflow:visible}
 .paw{position:absolute;bottom:14px;font-size:15px;opacity:.45;z-index:2;transform:rotate(90deg)}
 .bone{position:absolute;right:10px;bottom:24px;width:52px;height:23px;z-index:2;transform-origin:0 50%;animation:bob 1.8s ease-in-out infinite alternate}
+.lane.plane .bone{width:72px;height:46px;bottom:18px}
 .bone svg{width:100%;height:100%}
 @keyframes bob{to{transform:translateY(-5px) rotate(-6deg)}}
-.bone.eaten{animation:eaten 1.8s ease-in forwards}
-@keyframes eaten{0%{transform:scale(1)}25%{transform:scale(.8) rotate(-6deg)}55%{transform:scale(.55) rotate(5deg)}85%{transform:scale(.25)}100%{transform:scale(0)}}
+.bone.eaten{animation:eaten .8s ease-in forwards}
+@keyframes eaten{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(-8deg)}100%{transform:scale(0);opacity:0}}
 .tail{transform-origin:26px 54px;animation:wag .5s ease-in-out infinite alternate}
 @keyframes wag{from{transform:rotate(-14deg)}to{transform:rotate(18deg)}}
 .leg{transform-box:fill-box;transform-origin:50% 8%}
 .run .la{animation:swing .26s ease-in-out infinite alternate}
 .run .lb{animation:swing .26s ease-in-out infinite alternate-reverse}
 @keyframes swing{from{transform:rotate(-32deg)}to{transform:rotate(32deg)}}
-.run svg{animation:hop .26s ease-in-out infinite alternate}
+.run svg,.fly svg{animation:hop .26s ease-in-out infinite alternate}
 @keyframes hop{to{transform:translateY(-6px)}}
 .run .tail{animation-duration:.2s}
 .head{transform-origin:90px 58px}
 .eat .head{animation:chomp .42s ease-in-out infinite alternate}
 @keyframes chomp{from{transform:rotate(4deg)}to{transform:rotate(17deg)}}
-.oops .head{animation:nope .4s}
+.oops .head,.oops svg{animation:nope .4s}
 @keyframes nope{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
 .bub{position:absolute;right:4px;top:-26px;background:#fff;color:#27406b;font-weight:800;font-size:17px;padding:1px 10px;border-radius:12px;opacity:0;transform:scale(.4)}
 .bub.say{animation:pop .9s ease-out}
 @keyframes pop{15%{opacity:1;transform:scale(1.1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
-.heart{position:absolute;bottom:50px;font-size:24px;z-index:6;animation:fly 1.3s ease-out forwards}
+.heart,.boom{position:absolute;z-index:6;pointer-events:none}
+.heart{bottom:50px;font-size:24px;animation:fly 1.3s ease-out forwards}
 @keyframes fly{to{transform:translateY(-80px);opacity:0}}
-.card{background:var(--card);border-radius:28px;padding:18px 24px 20px;width:min(94vw,640px);box-sizing:border-box;text-align:center}
-.who{font-size:26px;font-weight:800;margin-bottom:4px}
-.q{font-size:52px;font-weight:800;margin:2px 0 14px;letter-spacing:2px}
-.opts{display:flex;gap:12px}
-button{font-family:inherit;cursor:pointer}
-.opts button{flex:1;font-size:38px;font-weight:800;padding:12px 0;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink);box-shadow:0 6px 0 rgba(0,0,0,.18)}
-.opts button:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
-button:focus-visible,input:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
-.msg{min-height:28px;font-size:21px;font-weight:700;margin-top:12px}
+.boom{right:16px;bottom:28px;font-size:32px;animation:pop .7s ease-out forwards}
+.bullet{position:absolute;bottom:36px;height:7px;width:16px;border-radius:7px;background:#ffd45c;z-index:4;transition:left .42s linear}
+.skydecor{pointer-events:none;position:absolute;inset:0;overflow:hidden}
+.cloud{position:absolute;font-size:28px;opacity:.75}
+.c1{left:8%;top:8px}.c2{right:10%;top:26px;font-size:22px}
+.pongnames{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pongnames span{background:var(--card);color:var(--ink);border-radius:14px;padding:4px 10px;font-weight:800}
+.pongnames span.on{box-shadow:0 0 0 4px var(--btn)}
+.table{position:relative;height:190px;border-radius:18px;background:#2f9e57;border:6px solid #f4f1e8;overflow:hidden}
+.net{position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;background:repeating-linear-gradient(#fff 0 8px,transparent 8px 14px)}
+.paddle{position:absolute;width:14px;height:58px;border-radius:8px;background:#ffd45c;top:62px}
+.paddle.left{left:12px}.paddle.right{right:12px;box-shadow:0 0 0 4px #fff}
+.ball{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;left:76%;top:42%;box-shadow:inset -4px -3px 0 #e4e4e4;transition:left .35s ease-in,top .35s ease-in}
+.ball.drop{top:120%}
+.card{background:var(--card);border-radius:28px;padding:16px 18px 18px;width:min(94vw,640px);text-align:center}
+.big{font-size:28px;font-weight:800;line-height:1.45}
+.subhead{font-size:16px;font-weight:800;opacity:.75;margin-bottom:8px}
+.label{font-size:15px;font-weight:800;margin:12px 0 6px;text-align:left}
+.hint{font-size:14px;font-weight:700;opacity:.8;min-height:20px;text-align:left;line-height:1.4}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{font-size:16px;font-weight:800;padding:8px 12px;border:0;border-radius:16px;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.pick.on{background:var(--btn);color:var(--btn-ink);box-shadow:0 4px 0 rgba(0,0,0,.16)}
+.who{font-size:22px;font-weight:800;text-align:left}
+.whorow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.qsec{font-size:28px;font-weight:800;min-width:52px;font-variant-numeric:tabular-nums}
+.qsec.danger{color:#d92b2b}
+.timer{height:8px;background:rgba(0,0,0,.08);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.timer>div{height:100%;width:100%;background:#6cc55a;border-radius:8px}
+.timer.danger>div{background:#e23d3d}
+.sub{font-size:15px;font-weight:800;opacity:.75;margin-top:2px}
+.q{font-size:48px;font-weight:800;margin:6px 0 12px;letter-spacing:1px;min-height:64px;display:flex;align-items:center;justify-content:center;line-height:1.15;word-break:break-word}
+.q.word{font-size:42px;letter-spacing:0}
+.q.char{font-size:76px}
+.opts{display:flex;gap:10px}
+.opts button{flex:1;font-size:34px;font-weight:800;padding:12px 4px;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink);box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.opts.words button,.opts.py button{font-size:24px;padding:14px 6px}
+.opts.py button{font-family:"Segoe UI","PingFang SC","Noto Sans",sans-serif}
+.opts button:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.opts button:disabled{cursor:default}
+.opts button.right{background:#8fd98a;color:#143018}
+.opts button.bad{background:#ffb4b4;color:#5a1a1a}
+.msg{min-height:28px;font-size:18px;font-weight:700;margin-top:12px;line-height:1.4}
 .shake{animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
-.big{font-size:28px;font-weight:800;line-height:1.5}
-.btn{margin:8px 6px 0;font-size:24px;font-weight:800;padding:12px 26px;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink)}
-.row{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:34px;justify-content:center}
+.btn{margin:8px 6px 0;font-size:22px;font-weight:800;padding:12px 22px;border:0;border-radius:22px;background:var(--btn);color:var(--btn-ink)}
+.row{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:28px;justify-content:center}
 .row input[type=checkbox]{width:26px;height:26px}
-.row input[type=text]{font-size:22px;width:150px;padding:8px 12px;border-radius:14px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-family:inherit}
+.row input[type=text]{font-size:18px;width:132px;padding:8px 12px;border-radius:14px;border:2px solid var(--ink);background:transparent;color:var(--ink)}
 .hide{display:none}
-@media (max-width:480px){.q{font-size:42px}.opts button{font-size:32px}.row input[type=text]{width:120px}}
-@media (prefers-reduced-motion:reduce){.bone,.tail{animation:none}.dog{transition:none}}
+@media (max-width:480px){
+.q{font-size:40px}.q.char{font-size:64px}.q.word{font-size:34px}
+.opts button{font-size:28px}.opts.words button,.opts.py button{font-size:20px}
+.row input[type=text]{width:108px}
+}
+@media (prefers-reduced-motion:reduce){
+.bone,.tail,.actor,.ball,.bullet,.heart,.boom{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
-<div class="top" id="top"></div>
-<div class="card" id="setup">
-  <div class="big">谁来玩?</div>
-  <div id="rows"></div>
-  <div class="msg" id="smsg"></div>
-  <button class="btn" id="start">开始赛跑</button>
+<div class="topbar hide" id="topbar">
+  <div class="clock" id="clock"></div>
+  <div class="top" id="top"></div>
 </div>
-<div class="stage hide" id="stage"></div>
+<div class="rule hide" id="rule"></div>
+<button class="linkbtn hide" id="quit" type="button">返回设置</button>
+<div class="card" id="setup">
+  <div class="big">小狗算数 · 全家赛跑</div>
+  <div class="subhead">算数、英语、拼音</div>
+  <div class="label">谁来玩?</div>
+  <div id="rows"></div>
+  <div class="label">玩法</div>
+  <div class="picks" id="modePicks"></div>
+  <div class="hint" id="modeHint"></div>
+  <div class="label">练习</div>
+  <div class="picks" id="subjectPicks"></div>
+  <div class="label">难度</div>
+  <div class="picks" id="diffPicks"></div>
+  <div class="hint" id="diffHint"></div>
+  <div class="label">每题时间</div>
+  <div class="picks" id="qsecPicks"></div>
+  <div class="label">整局时间</div>
+  <div class="picks" id="matchPicks"></div>
+  <div class="hint">超时这题算错。整局时间用完，领先的人赢。</div>
+  <div class="msg" id="smsg"></div>
+  <button class="btn" id="start" type="button">开始游戏</button>
+</div>
 <div class="card hide" id="play">
-  <div class="who" id="who"></div>
+  <div class="timer" id="timer"><div id="timerbar"></div></div>
+  <div class="whorow"><div class="who" id="who"></div><div class="qsec" id="qsec"></div></div>
+  <div class="sub" id="sub"></div>
   <div class="q" id="q"></div>
   <div class="opts" id="opts"></div>
-  <div class="msg" id="msg"></div>
+  <div class="msg" id="msg" aria-live="polite"></div>
 </div>
-<div class="card big hide" id="win"><span id="wtext"></span><br><button class="btn" id="again">再来一局</button><button class="btn" id="back">换人 / 改名</button></div>
+<div class="card big hide" id="win"><span id="wtext"></span><div><button class="btn" id="again" type="button">再来一局</button><button class="btn" id="back" type="button">返回设置</button></div></div>
+<div class="stage hide" id="stage"></div>
 <script>
 var $=function(i){return document.getElementById(i)};
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
 var HUES=[0,180,300,100];
 var ROWS=[['👨','爸爸',1],['👩','妈妈',1],['🧒','宝宝',1],['👧','姐姐',0]];
+var MODES=[{id:'dog',name:'小狗吃骨头'},{id:'plane',name:'打飞机'},{id:'pong',name:'打乒乓'}];
+var SUBJECTS=[{id:'math',name:'算数'},{id:'en',name:'英语'},{id:'py',name:'拼音'},{id:'mix',name:'混合'}];
+var DIFFS=[{id:'easy',name:'简单'},{id:'normal',name:'普通'},{id:'hard',name:'困难'}];
+var QSECS=[{id:8,name:'8秒'},{id:12,name:'12秒'},{id:20,name:'20秒'},{id:0,name:'不限'}];
+var MATCHES=[{id:0,name:'不限'},{id:60,name:'1分钟'},{id:120,name:'2分钟'},{id:180,name:'3分钟'}];
+var MODE_HINT={dog:'答对，小狗就往前跑，先到的吃到骨头',plane:'答对就开炮，先击落够数的获胜',pong:'答对就把球打回去，先打够次数的获胜'};
+var DIFF_HINT={
+  easy:'10 以内加减，常见单词，拼音差别很明显',
+  normal:'50 以内加减，日常单词，常用字的拼音',
+  hard:'100 以内加减，更难的单词，声调容易混的拼音'
+};
+var OK={mode:{dog:1,plane:1,pong:1},subject:{math:1,en:1,py:1,mix:1},diff:{easy:1,normal:1,hard:1},qsec:{0:1,8:1,12:1,20:1},matchsec:{0:1,60:1,120:1,180:1}};
 var DOG='<div class="bub">汪!</div><svg viewBox="0 0 140 110"><g class="tail"><path d="M26 54 Q6 46 12 26" fill="none" stroke="#c98a4b" stroke-width="10" stroke-linecap="round"/></g>'+
 '<g class="leg la"><rect x="30" y="68" width="13" height="26" rx="6.5" fill="#a96d35"/><ellipse cx="36.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
 '<g class="leg lb"><rect x="90" y="68" width="13" height="26" rx="6.5" fill="#a96d35"/><ellipse cx="96.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
@@ -95,11 +191,156 @@ var DOG='<div class="bub">汪!</div><svg viewBox="0 0 140 110"><g class="tail"><
 '<g class="leg la"><rect x="76" y="68" width="13" height="26" rx="6.5" fill="#c98a4b"/><ellipse cx="82.5" cy="94" rx="8" ry="4.5" fill="#f6dcae"/></g>'+
 '<g class="head"><circle cx="104" cy="40" r="24" fill="#e0a458"/><ellipse cx="90" cy="38" rx="9" ry="17" transform="rotate(12 90 38)" fill="#8a5a2b"/><ellipse cx="121" cy="48" rx="15" ry="11" fill="#f6dcae"/><ellipse cx="133" cy="44" rx="5" ry="4" fill="#3a2a22"/><circle cx="110" cy="34" r="4" fill="#2b2020"/><circle cx="111.2" cy="32.8" r="1.3" fill="#fff"/><circle cx="112" cy="50" r="4" fill="#ffb3a7" opacity=".6"/><path d="M118 54 Q124 58 130 53" fill="none" stroke="#3a2a22" stroke-width="2" stroke-linecap="round"/><path d="M122 56 q3 8 6 0z" fill="#ff7f9a"/></g></svg>';
 var BONE='<svg viewBox="0 0 64 28"><g fill="#fff6e0" stroke="#d2ab74" stroke-width="2"><circle cx="10" cy="8" r="7"/><circle cx="10" cy="20" r="7"/><circle cx="54" cy="8" r="7"/><circle cx="54" cy="20" r="7"/></g><rect x="10" y="6" width="44" height="16" fill="#fff6e0"/></svg>';
-var saved={names:{},bones:{}};
-try{var s=JSON.parse(localStorage.getItem('puppyMathFamily')||'null');if(s)saved=s}catch(e){}
+var PLANE='<div class="bub">中!</div><svg viewBox="0 0 140 90"><polygon points="48,46 8,16 30,46" fill="#ffd45c"/><polygon points="48,50 8,80 30,50" fill="#e0a83a"/><ellipse cx="68" cy="48" rx="38" ry="14" fill="#7eb6ff"/><polygon points="100,48 132,48 104,34" fill="#ff6b6b"/><rect x="74" y="32" width="16" height="12" rx="3" fill="#eaf6ff"/><circle cx="82" cy="38" r="3" fill="#27406b"/></svg>';
+var ENEMY='<svg viewBox="0 0 90 52"><polygon points="34,28 6,8 18,28" fill="#ffd45c"/><polygon points="34,28 6,48 18,28" fill="#e0a83a"/><ellipse cx="48" cy="28" rx="26" ry="10" fill="#5d6d88"/><polygon points="24,28 4,28 22,18" fill="#ff8f8f"/></svg>';
+var WORDS={
+  easy:[['dog','狗'],['cat','猫'],['bird','鸟'],['fish','鱼'],['apple','苹果'],['banana','香蕉'],['milk','牛奶'],['water','水'],['book','书'],['pen','笔'],['red','红色'],['blue','蓝色'],['sun','太阳'],['moon','月亮'],['star','星星'],['car','汽车'],['ball','球'],['egg','鸡蛋'],['pig','猪'],['duck','鸭子'],['rice','米饭'],['hand','手'],['foot','脚'],['eye','眼睛'],['mom','妈妈'],['dad','爸爸']],
+  normal:[['school','学校'],['teacher','老师'],['friend','朋友'],['happy','高兴'],['run','跑'],['jump','跳'],['eat','吃'],['sleep','睡觉'],['house','房子'],['tree','树'],['flower','花'],['rain','下雨'],['cloud','云'],['door','门'],['chair','椅子'],['shoe','鞋子'],['hat','帽子'],['morning','早上'],['family','家人'],['sister','姐姐'],['open','打开'],['close','关闭'],['big','大'],['small','小'],['green','绿色'],['yellow','黄色'],['brother','哥哥']],
+  hard:[['beautiful','美丽'],['careful','小心'],['together','一起'],['afternoon','下午'],['evening','晚上'],['weather','天气'],['question','问题'],['answer','答案'],['listen','听'],['speak','说话'],['read','阅读'],['write','写字'],['please','请'],['thanks','谢谢'],['sorry','对不起'],['tomorrow','明天'],['yesterday','昨天'],['library','图书馆'],['playground','操场'],['because','因为'],['always','总是'],['animal','动物'],['number','数字'],['window','窗户'],['breakfast','早餐'],['rabbit','兔子']]
+};
+var PINYIN={
+  easy:[['妈','mā'],['爸','bà'],['我','wǒ'],['你','nǐ'],['大','dà'],['小','xiǎo'],['人','rén'],['口','kǒu'],['日','rì'],['月','yuè'],['水','shuǐ'],['火','huǒ'],['山','shān'],['上','shàng'],['下','xià'],['木','mù'],['手','shǒu'],['天','tiān'],['田','tián'],['猫','māo']],
+  normal:[['马','mǎ'],['花','huā'],['鸟','niǎo'],['鱼','yú'],['书','shū'],['门','mén'],['车','chē'],['雨','yǔ'],['云','yún'],['风','fēng'],['早','zǎo'],['吃','chī'],['喝','hē'],['看','kàn'],['听','tīng'],['说','shuō'],['走','zǒu'],['跑','pǎo'],['来','lái'],['去','qù'],['白','bái'],['红','hóng'],['绿','lǜ'],['黄','huáng'],['中','zhōng'],['羊','yáng'],['果','guǒ'],['牙','yá']]
+};
+var PINYIN_HARD=[
+  {c:'妈',a:'mā',w:['mǎ','mà']},{c:'马',a:'mǎ',w:['mā','mà']},{c:'八',a:'bā',w:['bá','bǎ']},{c:'把',a:'bǎ',w:['bā','bà']},
+  {c:'七',a:'qī',w:['qí','qǐ']},{c:'起',a:'qǐ',w:['qī','qì']},{c:'十',a:'shí',w:['shì','sì']},{c:'是',a:'shì',w:['shí','sì']},
+  {c:'书',a:'shū',w:['shù','shǔ']},{c:'树',a:'shù',w:['shū','shǔ']},{c:'花',a:'huā',w:['huá','huà']},{c:'画',a:'huà',w:['huā','huá']},
+  {c:'鱼',a:'yú',w:['yǔ','yù']},{c:'雨',a:'yǔ',w:['yú','yù']},{c:'吃',a:'chī',w:['chí','chǐ']},{c:'尺',a:'chǐ',w:['chī','chì']},
+  {c:'飞',a:'fēi',w:['féi','fěi']},{c:'不',a:'bù',w:['bú','bǔ']},{c:'一',a:'yī',w:['yí','yǐ']},{c:'女',a:'nǚ',w:['nū','nǔ']},
+  {c:'绿',a:'lǜ',w:['lù','lú']},{c:'机',a:'jī',w:['jí','jǐ']},{c:'中',a:'zhōng',w:['zhǒng','zhòng']},{c:'猫',a:'māo',w:['máo','mǎo']}
+];
+var TONE={'ā':'a','á':'a','ǎ':'a','à':'a','ē':'e','é':'e','ě':'e','è':'e','ī':'i','í':'i','ǐ':'i','ì':'i','ō':'o','ó':'o','ǒ':'o','ò':'o','ū':'u','ú':'u','ǔ':'u','ù':'u','ǖ':'v','ǘ':'v','ǚ':'v','ǜ':'v'};
+function bare(py){var s='',i;for(i=0;i<py.length;i++)s+=TONE[py.charAt(i)]||py.charAt(i);return s}
+function pyInitial(py){var b=bare(py);if(b.indexOf('zh')===0||b.indexOf('ch')===0||b.indexOf('sh')===0)return b.slice(0,2);return b.charAt(0)}
+var saved={names:{},stars:{}};
+try{var loaded=JSON.parse(localStorage.getItem('puppyMathFamily')||'null');if(loaded&&typeof loaded==='object')saved=loaded}catch(e){}
+if(!saved.stars){
+  saved.stars={};
+  if(saved.bones){for(var bk in saved.bones)if(Object.prototype.hasOwnProperty.call(saved.bones,bk))saved.stars[bk]=saved.bones[bk]||0}
+}
+if(!saved.names)saved.names={};
+var settings={mode:'dog',subject:'math',diff:'easy',qsec:12,matchsec:120};
+(function(){
+  var s=saved.settings||{},k,d={mode:'dog',subject:'math',diff:'easy',qsec:12,matchsec:120};
+  for(k in d)if(s[k]!==undefined&&OK[k][s[k]])d[k]=s[k];
+  settings=d;
+})();
 function save(){try{localStorage.setItem('puppyMathFamily',JSON.stringify(saved))}catch(e){}}
-var players=[],turn=0,ans=0,locked=true,over=false;
+function persistSettings(){
+  saved.settings={mode:settings.mode,subject:settings.subject,diff:settings.diff,qsec:settings.qsec,matchsec:settings.matchsec};
+  save();
+}
+var players=[],turn=0,locked=true,over=false,current=null,roundGoal=8;
+var qTimer=null,matchTimer=null,matchEnd=0,audioCtx=null,lastOp='',lastPrompt='';
 
+function mathMax(){return settings.diff==='easy'?10:settings.diff==='normal'?50:100}
+function roundGoalFor(){
+  var timed=settings.matchsec>0;
+  if(settings.mode==='dog')return timed?5:8;
+  if(settings.mode==='plane')return timed?4:6;
+  return timed?4:5;
+}
+function fillNums(set,max){
+  var guard=0,span=settings.diff==='hard'?4:settings.diff==='normal'?8:5,n=0;
+  while(set.length<3&&guard<40){
+    guard++;
+    var delta=rnd(1,span),w=set[0]+(Math.random()<0.5?delta:-delta);
+    if(w>=0&&w<=max&&set.indexOf(w)<0)set.push(w);
+  }
+  while(set.length<3&&n<=max+3){if(set.indexOf(n)<0)set.push(n);n++}
+}
+function mathQ(){
+  var max=mathMax(),useAdd=Math.random()<0.5,a,b,ans,op;
+  if((useAdd&&lastOp==='+')||(!useAdd&&lastOp==='−'))useAdd=!useAdd;
+  if(useAdd){a=rnd(1,max-1);b=rnd(1,max-a);ans=a+b;op='+'}
+  else{a=rnd(1,max);b=rnd(1,a);ans=a-b;op='−'}
+  lastOp=op;
+  var set=[ans];fillNums(set,max);shuffle(set);
+  return {kind:'math',sub:'算数 · '+max+'以内',prompt:a+' '+op+' '+b+' = ?',options:set,answer:ans};
+}
+function takeMeanings(pool,answer){
+  var opts=[answer],guard=0;
+  while(opts.length<3&&guard<40){
+    guard++;
+    var m=pool[rnd(0,pool.length-1)][1];
+    if(opts.indexOf(m)<0)opts.push(m);
+  }
+  return shuffle(opts);
+}
+function englishQ(){
+  var pool=WORDS[settings.diff],item=pool[rnd(0,pool.length-1)];
+  return {kind:'en',sub:'英语 · 选出意思',prompt:item[0],options:takeMeanings(pool,item[1]),answer:item[1]};
+}
+function pinyinQ(){
+  if(settings.diff==='hard'){
+    var item=PINYIN_HARD[rnd(0,PINYIN_HARD.length-1)];
+    return {kind:'py',sub:'拼音 · 选出读音',prompt:item.c,options:shuffle([item.a,item.w[0],item.w[1]]),answer:item.a};
+  }
+  var pool=PINYIN[settings.diff],item=pool[rnd(0,pool.length-1)],opts=[item[1]],guard=0,strict=true,m;
+  while(opts.length<3&&guard<70){
+    guard++;
+    m=pool[rnd(0,pool.length-1)][1];
+    if(opts.indexOf(m)>=0||bare(m)===bare(item[1]))continue;
+    if(strict&&settings.diff==='easy'&&pyInitial(m)===pyInitial(item[1])){if(guard>28)strict=false;continue}
+    opts.push(m);
+  }
+  var fb=['mā','bà','rì','huǒ','tiān'];
+  for(var i=0;i<fb.length&&opts.length<3;i++)if(opts.indexOf(fb[i])<0&&fb[i]!==item[1])opts.push(fb[i]);
+  return {kind:'py',sub:'拼音 · 选出读音',prompt:item[0],options:shuffle(opts),answer:item[1]};
+}
+function rawQ(){
+  var s=settings.subject;
+  if(s==='mix')s=['math','en','py'][rnd(0,2)];
+  if(s==='en')return englishQ();
+  if(s==='py')return pinyinQ();
+  return mathQ();
+}
+function freshQ(){
+  var q,guard=0;
+  do{q=rawQ();guard++}while(q.prompt===lastPrompt&&guard<6);
+  lastPrompt=q.prompt;
+  return q;
+}
+function tone(freq,dur){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    if(!audioCtx)audioCtx=new AC();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    var o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;
+    o.type='sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.05,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();o.stop(t+dur+0.02);
+  }catch(e){}
+}
+function beep(ok){tone(ok?740:196,ok?0.14:0.22)}
+function cheer(){tone(523,0.12);setTimeout(function(){tone(659,0.12)},120);setTimeout(function(){tone(784,0.18)},240)}
+function show(id,on){$(id).classList.toggle('hide',!on)}
+function showHUD(on){$('topbar').classList.toggle('hide',!on);$('rule').classList.toggle('hide',!on);$('quit').classList.toggle('hide',!on)}
+function clearTimers(){clearInterval(qTimer);clearInterval(matchTimer);qTimer=matchTimer=null}
+function paintPicks(el,key){
+  var btns=el.querySelectorAll('button'),i;
+  for(i=0;i<btns.length;i++){
+    var on=String(settings[key])===btns[i].getAttribute('data-id');
+    btns[i].classList.toggle('on',on);
+    btns[i].setAttribute('aria-pressed',on?'true':'false');
+  }
+}
+function renderHints(){$('modeHint').textContent=MODE_HINT[settings.mode];$('diffHint').textContent=DIFF_HINT[settings.diff]}
+function makePicks(id,items,key){
+  var el=$(id);el.innerHTML='';
+  items.forEach(function(it){
+    var b=document.createElement('button');
+    b.type='button';b.className='pick';b.textContent=it.name;b.setAttribute('data-id',String(it.id));
+    b.onclick=function(){settings[key]=it.id;persistSettings();paintPicks(el,key);renderHints()};
+    el.appendChild(b);
+  });
+  paintPicks(el,key);
+}
 function buildSetup(){
   var r=$('rows');r.innerHTML='';
   ROWS.forEach(function(row,i){
@@ -110,128 +351,356 @@ function buildSetup(){
     var t=document.createElement('input');t.type='text';t.maxLength=6;t.value=(saved.names&&saved.names[i])||row[1];
     d.appendChild(c);d.appendChild(e);d.appendChild(t);r.appendChild(d);
   });
+  makePicks('modePicks',MODES,'mode');
+  makePicks('subjectPicks',SUBJECTS,'subject');
+  makePicks('diffPicks',DIFFS,'diff');
+  makePicks('qsecPicks',QSECS,'qsec');
+  makePicks('matchPicks',MATCHES,'matchsec');
+  renderHints();
 }
-function show(id,on){$(id).classList.toggle('hide',!on)}
-function startGame(){
-  var rows=$('rows').children,list=[],on={},names={};
-  for(var i=0;i<rows.length;i++){
-    var cb=rows[i].children[0],tx=rows[i].children[2];
-    on[i]=cb.checked?1:0;names[i]=tx.value||ROWS[i][1];
-    if(cb.checked)list.push({idx:i,emoji:ROWS[i][0],name:tx.value.trim()||ROWS[i][1],hue:HUES[i]});
-  }
-  if(!list.length){$('smsg').textContent='至少选一个人哦';return}
-  saved.on=on;saved.names=names;
-  players=list.map(function(p){p.step=0;p.bones=saved.bones[p.name]||0;return p});
-  $('smsg').textContent='';
-  buildStage();show('setup',false);show('stage',true);show('play',true);show('win',false);
-  turn=0;over=false;renderTop();nextQ();
+function setOptsDisabled(dis){
+  var btns=$('opts').querySelectorAll('button'),i;
+  for(i=0;i<btns.length;i++)btns[i].disabled=dis;
 }
-function buildStage(){
-  var st=$('stage');st.innerHTML='';
-  players.forEach(function(p){
-    var lane=document.createElement('div');lane.className='lane';
-    var tag=document.createElement('div');tag.className='tag';
-    var bone=document.createElement('div');bone.className='bone';bone.innerHTML=BONE;
-    var dog=document.createElement('div');dog.className='dog';dog.innerHTML=DOG;
-    dog.firstChild.nextSibling.style.filter='hue-rotate('+p.hue+'deg)';
-    lane.appendChild(tag);lane.appendChild(bone);lane.appendChild(dog);st.appendChild(lane);
-    p.lane=lane;p.tag=tag;p.bone=bone;p.dog=dog;p.bub=dog.firstChild;
-    setTag(p);
-  });
-  place(false);
+function markRight(){
+  var btns=$('opts').querySelectorAll('button'),want=String(current.answer),i;
+  for(i=0;i<btns.length;i++)if(btns[i].textContent===want)btns[i].classList.add('right');
 }
-function setTag(p){p.tag.textContent=p.emoji+' '+p.name+'  '+p.step+'/10'}
-function dogLeft(p,s){
-  var maxL=p.lane.clientWidth-p.dog.offsetWidth-52-18;
-  return 10+(maxL-10)*s/10;
-}
-function place(anim){
-  players.forEach(function(p){
-    if(!anim)p.dog.style.transition='none';
-    p.dog.style.left=dogLeft(p,p.step)+'px';
-    if(!anim){void p.dog.offsetWidth;p.dog.style.transition=''}
-  });
+function nextTail(){return players.length>1?' 换下一位!':' 再来一题!'}
+function successText(){
+  if(settings.mode==='plane')return '答对啦!击落一架';
+  if(settings.mode==='pong')return '答对啦!球打回去了';
+  return '答对啦!小狗往前跑';
 }
 function renderTop(){
   var t=$('top');t.innerHTML='';
   players.forEach(function(p){
-    var s=document.createElement('span');s.textContent=p.emoji+' '+p.name+' 🦴 '+p.bones;t.appendChild(s);
+    var s=document.createElement('span');
+    s.textContent=p.emoji+' '+p.name+' '+p.step+'/'+roundGoal+' ⭐'+p.stars;
+    t.appendChild(s);
   });
+}
+function renderRule(){
+  var what={dog:'跑到 '+roundGoal+' 步',plane:'击落 '+roundGoal+' 架',pong:'打回 '+roundGoal+' 个球'}[settings.mode];
+  var q=settings.qsec?('每题 '+settings.qsec+' 秒'):'每题不限时';
+  var m=settings.matchsec?('整局 '+(settings.matchsec/60)+' 分钟'):'整局不限时';
+  $('rule').textContent='先'+what+'。'+q+'，'+m+'。';
+}
+function renderClock(ms){
+  var el=$('clock');
+  if(!settings.matchsec){el.textContent='不限时';el.classList.remove('danger');return}
+  if(ms<0)ms=0;
+  var s=Math.ceil(ms/1000),m=Math.floor(s/60),r=s%60;
+  el.textContent=(m<10?'0':'')+m+':'+(r<10?'0':'')+r;
+  el.classList.toggle('danger',s<=10);
+}
+function startMatch(){
+  clearInterval(matchTimer);matchTimer=null;
+  if(!settings.matchsec){renderClock(0);return}
+  matchEnd=Date.now()+settings.matchsec*1000;
+  renderClock(matchEnd-Date.now());
+  matchTimer=setInterval(function(){
+    if(over)return;
+    var left=matchEnd-Date.now();
+    if(left<=0)timeUp();
+    else renderClock(left);
+  },200);
+}
+function startQTimer(){
+  clearInterval(qTimer);qTimer=null;
+  var bar=$('timerbar'),label=$('qsec');
+  bar.style.width='100%';
+  $('timer').classList.remove('danger');
+  label.classList.remove('danger');
+  if(!settings.qsec){label.textContent='不限';return}
+  var total=settings.qsec*1000,start=Date.now();
+  function tick(){
+    if(over)return;
+    var left=total-(Date.now()-start);
+    if(left<=0){clearInterval(qTimer);bar.style.width='0%';label.textContent='0';onTimeout();return}
+    var sec=Math.ceil(left/1000);
+    label.textContent=String(sec);
+    bar.style.width=(left/total*100)+'%';
+    var danger=sec<=3;
+    $('timer').classList.toggle('danger',danger);
+    label.classList.toggle('danger',danger);
+  }
+  tick();
+  qTimer=setInterval(tick,100);
+}
+function scrollQ(){
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('play').scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});
+}
+function whoText(p){
+  if(settings.mode==='plane')return p.emoji+' '+p.name+' · 击落 '+p.step+'/'+roundGoal;
+  if(settings.mode==='pong')return p.emoji+' '+p.name+' · 得分 '+p.step+'/'+roundGoal;
+  return p.emoji+' '+p.name+' · '+p.step+'/'+roundGoal+' 步';
+}
+function renderPongNames(){
+  var box=$('pongnames');if(!box)return;
+  box.innerHTML='';
+  players.forEach(function(p,i){
+    var s=document.createElement('span');
+    if(i===turn)s.className='on';
+    s.textContent=p.emoji+' '+p.name+' '+p.step;
+    box.appendChild(s);
+  });
+}
+function markTurn(){
+  players.forEach(function(p,i){if(p.lane)p.lane.classList.toggle('now',i===turn)});
+  renderPongNames();
 }
 function nextQ(){
+  if(over)return;
+  current=freshQ();
   var p=players[turn];
-  players.forEach(function(q,i){q.lane.classList.toggle('now',i===turn)});
-  $('who').textContent=p.emoji+' '+p.name+' 的回合';
-  $('msg').textContent=players.length>1?'答对了,你的小狗就往前跑!':'答对了,小狗就往前跑!';
-  var a,b;
-  if(Math.random()<.5){a=rnd(1,49);b=rnd(1,50-a);ans=a+b;$('q').textContent=a+' + '+b+' = ?'}
-  else{a=rnd(2,50);b=rnd(1,a-1);ans=a-b;$('q').textContent=a+' − '+b+' = ?'}
-  var set=[ans];
-  while(set.length<3){var w=ans+rnd(-6,6);if(w>=0&&w<=50&&set.indexOf(w)<0)set.push(w)}
-  set.sort(function(){return Math.random()-.5});
-  var o=$('opts');o.innerHTML='';
-  set.forEach(function(n){
-    var bt=document.createElement('button');bt.textContent=n;
-    bt.onclick=function(){pick(n,bt)};o.appendChild(bt);
+  markTurn();
+  $('who').textContent=whoText(p);
+  $('sub').textContent=current.sub;
+  var q=$('q');
+  q.textContent=current.prompt;
+  q.className='q'+(current.kind==='py'?' char':current.kind==='en'?' word':'');
+  var o=$('opts');
+  o.className='opts'+(current.kind==='math'?'':current.kind==='py'?' py':' words');
+  o.innerHTML='';
+  current.options.forEach(function(n){
+    var bt=document.createElement('button');
+    bt.type='button';bt.textContent=n;
+    bt.onclick=function(){pick(n,bt)};
+    o.appendChild(bt);
   });
+  $('msg').textContent=settings.mode==='plane'?'答对就开炮':settings.mode==='pong'?'答对就把球打回去':'答对了，小狗就往前跑';
+  if(settings.mode==='pong')pongReset();
   locked=false;
+  startQTimer();
+  scrollQ();
 }
-function addPaw(p){
-  var e=document.createElement('span');e.className='paw';e.textContent='🐾';
-  e.style.left=(p.dog.offsetLeft+16)+'px';p.lane.appendChild(e);
-}
-function say(p){var b=p.bub;b.classList.remove('say');void b.offsetWidth;b.classList.add('say')}
-function advance(){
-  turn=(turn+1)%players.length;nextQ();
-}
+function advance(){if(over)return;turn=(turn+1)%players.length;nextQ()}
 function pick(n,bt){
-  if(locked)return;
-  var p=players[turn];locked=true;
-  if(n===ans){
-    $('msg').textContent='答对啦!'+p.name+'的小狗出发 🐕';
-    addPaw(p);p.step++;setTag(p);
-    p.dog.classList.add('run');p.dog.style.left=dogLeft(p,p.step)+'px';
-    setTimeout(function(){
-      p.dog.classList.remove('run');say(p);
-      if(p.step>=10)finish(p);else setTimeout(advance,350);
-    },780);
-  }else{
-    $('msg').textContent='答错啦,换下一位!';
-    bt.classList.remove('shake');void bt.offsetWidth;bt.classList.add('shake');
-    p.dog.classList.remove('oops');void p.dog.offsetWidth;p.dog.classList.add('oops');
-    setTimeout(advance,1100);
+  if(locked||over)return;
+  locked=true;
+  clearInterval(qTimer);qTimer=null;
+  setOptsDisabled(true);
+  var p=players[turn];
+  if(n===current.answer)succeed(p);
+  else{
+    bt.classList.remove('shake');void bt.offsetWidth;bt.classList.add('shake');bt.classList.add('bad');
+    markRight();beep(false);failFx(p);
+    $('msg').textContent='再想想。正确答案是 '+current.answer+'。'+nextTail();
+    setTimeout(function(){if(!over)advance()},1400);
   }
 }
-function finish(p){
-  over=true;show('play',false);
-  p.dog.classList.add('eat');p.bone.classList.add('eaten');
+function onTimeout(){
+  if(locked||over)return;
+  locked=true;setOptsDisabled(true);markRight();beep(false);failFx(players[turn]);
+  $('msg').textContent='时间到。正确答案是 '+current.answer+'。'+nextTail();
+  setTimeout(function(){if(!over)advance()},1400);
+}
+function failFx(p){
+  if(settings.mode==='pong'){pongMiss();return}
+  if(!p.actor)return;
+  p.actor.classList.remove('oops');void p.actor.offsetWidth;p.actor.classList.add('oops');
+}
+function say(p){if(!p.bub)return;p.bub.classList.remove('say');void p.bub.offsetWidth;p.bub.classList.add('say')}
+function addPaw(p){
+  var e=document.createElement('span');e.className='paw';e.textContent='🐾';
+  e.style.left=(p.actor.offsetLeft+16)+'px';p.lane.appendChild(e);
+}
+function shoot(p){
+  var b=document.createElement('div');b.className='bullet';
+  b.style.left=(p.actor.offsetLeft+70)+'px';p.lane.appendChild(b);
+  void b.offsetWidth;b.style.left=(p.lane.clientWidth-70)+'px';
+  setTimeout(function(){if(b.parentNode)b.remove()},480);
+}
+function actorLeft(p,s){
+  var maxL=p.lane.clientWidth-p.actor.offsetWidth-78;
+  if(maxL<20)maxL=20;
+  return 10+(maxL-10)*s/roundGoal;
+}
+function place(anim){
+  if(settings.mode==='pong')return;
+  players.forEach(function(p){
+    if(!p.actor)return;
+    if(!anim)p.actor.style.transition='none';
+    p.actor.style.left=actorLeft(p,p.step)+'px';
+    if(!anim){void p.actor.offsetWidth;p.actor.style.transition=''}
+  });
+}
+function setTag(p){if(p.tag)p.tag.textContent=p.emoji+' '+p.name+'  '+p.step+'/'+roundGoal}
+function pongBall(){return $('ball')}
+function pongReset(){var ball=pongBall();if(!ball)return;ball.className='ball';ball.style.left='76%';ball.style.top='42%'}
+function pongHit(){var ball=pongBall();if(!ball)return;ball.className='ball';ball.style.left='12%';ball.style.top='42%'}
+function pongMiss(){var ball=pongBall();if(!ball)return;ball.className='ball drop'}
+function succeed(p){
+  beep(true);
+  $('msg').textContent=successText();
+  p.step++;
+  renderTop();
+  if(settings.mode==='pong'){pongHit();renderPongNames()}
+  else{
+    setTag(p);
+    if(settings.mode==='dog')addPaw(p);else shoot(p);
+    p.actor.classList.add(settings.mode==='plane'?'fly':'run');
+    p.actor.style.left=actorLeft(p,p.step)+'px';
+  }
+  $('who').textContent=whoText(p);
+  var delay=settings.mode==='pong'?480:780;
+  if(p.step>=roundGoal){
+    over=true;clearTimers();
+    setTimeout(function(){celebrate(p)},delay);
+    setTimeout(function(){finishWin(p)},delay+(settings.mode==='dog'?1200:600));
+    return;
+  }
+  setTimeout(function(){
+    if(over)return;
+    if(p.actor){p.actor.classList.remove('run');p.actor.classList.remove('fly');say(p)}
+    setTimeout(function(){if(!over)advance()},300);
+  },delay);
+}
+function burst(parent,x){
   for(var i=0;i<6;i++)(function(i){
     setTimeout(function(){
-      var h=document.createElement('span');h.className='heart';h.textContent='❤️';
-      h.style.left=(p.dog.offsetLeft+p.dog.offsetWidth*0.5+rnd(-10,40))+'px';
-      h.onanimationend=function(){h.remove()};p.lane.appendChild(h);
-    },i*220);
+      if(!parent.parentNode&&parent!==$('stage'))return;
+      var h=document.createElement('span');h.className='heart';h.textContent='❤️';h.style.left=x;
+      h.onanimationend=function(){h.remove()};parent.appendChild(h);
+    },i*180);
   })(i);
-  setTimeout(function(){
-    p.dog.classList.remove('eat');
-    p.bones++;saved.bones[p.name]=p.bones;save();renderTop();
-    $('wtext').textContent=players.length>1?'🎉 '+p.emoji+' '+p.name+' 赢啦!小狗吃到了骨头!':'🎉 太棒啦!小狗吃到了骨头!';
-    show('win',true);
-  },1900);
+}
+function celebrate(p){
+  cheer();
+  if(settings.mode==='pong'){
+    pongHit();
+    var table=document.querySelector('.table');
+    if(table)burst(table.parentNode,'40%');
+    return;
+  }
+  if(settings.mode==='dog'){p.actor.classList.add('eat');p.bone.classList.add('eaten')}
+  else{
+    p.actor.classList.add('fly');p.bone.classList.add('eaten');say(p);
+    var boom=document.createElement('div');boom.className='boom';boom.textContent='💥';
+    p.lane.appendChild(boom);setTimeout(function(){if(boom.parentNode)boom.remove()},700);
+  }
+  burst(p.lane,(p.actor.offsetLeft+30)+'px');
+}
+function giveStar(p){p.stars++;saved.stars[p.name]=p.stars;save();renderTop()}
+function finishWin(p){
+  giveStar(p);
+  var who=p.emoji+' '+p.name;
+  var text;
+  if(players.length<2){
+    if(settings.mode==='plane')text='太棒啦!飞机都被击落啦!';
+    else if(settings.mode==='pong')text='太棒啦!球都打回去了!';
+    else text='太棒啦!小狗吃到了骨头!';
+  }else if(settings.mode==='plane')text=who+' 赢啦!飞机都被击落啦!';
+  else if(settings.mode==='pong')text=who+' 赢啦!球都打回去了!';
+  else text=who+' 赢啦!小狗吃到了骨头!';
+  showWin('🎉 '+text);
+}
+function leaders(){
+  var best=-1,list=[],i;
+  for(i=0;i<players.length;i++){
+    if(players[i].step>best){best=players[i].step;list=[players[i]]}
+    else if(players[i].step===best)list.push(players[i]);
+  }
+  return {best:best,list:list};
+}
+function timeUp(){
+  if(over)return;
+  over=true;clearTimers();locked=true;
+  var lead=leaders(),text;
+  if(lead.best<=0)text='时间到，还没人得分。再试一次吧!';
+  else if(players.length<2){
+    var unit=settings.mode==='plane'?'架':settings.mode==='pong'?'个球':'步';
+    text='时间到，你完成了 '+lead.best+' '+unit+'!';
+  }else if(lead.list.length>1){
+    text='时间到，'+lead.list.map(function(p){return p.emoji+' '+p.name}).join('、')+' 打成平局!';
+  }else{
+    giveStar(lead.list[0]);
+    text='时间到，'+lead.list[0].emoji+' '+lead.list[0].name+' 领先!';
+  }
+  showWin('⏰ '+text);
+}
+function showWin(text){$('wtext').textContent=text;show('play',false);show('win',true)}
+function buildStage(){
+  var st=$('stage');
+  st.className='stage '+settings.mode;
+  st.innerHTML='';
+  if(settings.mode==='pong'){buildPong(st);return}
+  if(settings.mode==='plane'){
+    var sky=document.createElement('div');sky.className='skydecor';
+    sky.innerHTML='<span class="cloud c1">☁</span><span class="cloud c2">☁</span>';
+    st.appendChild(sky);
+  }
+  players.forEach(function(p){
+    var lane=document.createElement('div');lane.className='lane '+settings.mode;
+    var tag=document.createElement('div');tag.className='tag';
+    var bone=document.createElement('div');bone.className='bone';bone.innerHTML=settings.mode==='plane'?ENEMY:BONE;
+    var actor=document.createElement('div');actor.className='actor';actor.innerHTML=settings.mode==='plane'?PLANE:DOG;
+    var svg=actor.querySelector('svg');if(svg)svg.style.filter='hue-rotate('+p.hue+'deg)';
+    lane.appendChild(tag);lane.appendChild(bone);lane.appendChild(actor);st.appendChild(lane);
+    p.lane=lane;p.tag=tag;p.bone=bone;p.actor=actor;p.bub=actor.firstChild;
+    setTag(p);
+  });
+  place(false);
+}
+function buildPong(st){
+  var names=document.createElement('div');names.className='pongnames';names.id='pongnames';
+  var table=document.createElement('div');table.className='table';
+  table.innerHTML='<div class="net"></div><div class="paddle left"></div><div class="paddle right"></div><div class="ball" id="ball"></div>';
+  st.appendChild(names);st.appendChild(table);
+  players.forEach(function(p){p.lane=p.tag=p.bone=p.actor=p.bub=null});
+  renderPongNames();
+}
+function clearJunk(p){
+  if(!p.lane)return;
+  var junk=p.lane.querySelectorAll('.paw,.boom,.bullet,.heart'),i;
+  for(i=0;i<junk.length;i++)junk[i].remove();
+}
+function resetRound(){
+  players.forEach(function(p){
+    p.step=0;
+    if(p.actor){
+      p.actor.classList.remove('run','fly','eat','oops');
+      p.bone.classList.remove('eaten');
+      clearJunk(p);setTag(p);
+    }
+  });
+  if(settings.mode==='pong'){pongReset();renderPongNames()}
+  else place(false);
+}
+function startGame(){
+  var rows=$('rows').children,list=[],on={},names={},i;
+  for(i=0;i<rows.length;i++){
+    var cb=rows[i].children[0],tx=rows[i].children[2];
+    on[i]=cb.checked?1:0;names[i]=tx.value.trim()||ROWS[i][1];
+    if(cb.checked)list.push({idx:i,emoji:ROWS[i][0],name:tx.value.trim()||ROWS[i][1],hue:HUES[i]});
+  }
+  if(!list.length){$('smsg').textContent='至少选一个人哦';return}
+  $('smsg').textContent='';
+  saved.on=on;saved.names=names;persistSettings();
+  clearTimers();
+  roundGoal=roundGoalFor();
+  lastOp='';lastPrompt='';
+  players=list.map(function(p){p.step=0;p.stars=saved.stars[p.name]||0;return p});
+  turn=0;over=false;locked=true;
+  show('setup',false);show('win',false);show('play',true);show('stage',true);showHUD(true);
+  buildStage();renderTop();renderRule();startMatch();nextQ();
+}
+function again(){
+  clearTimers();over=false;locked=true;turn=0;lastPrompt='';
+  resetRound();show('win',false);show('play',true);renderTop();startMatch();nextQ();
+}
+function back(){
+  clearTimers();over=true;locked=true;players=[];
+  show('stage',false);show('play',false);show('win',false);showHUD(false);
+  $('top').innerHTML='';show('setup',true);buildSetup();
 }
 $('start').onclick=startGame;
-$('again').onclick=function(){
-  players.forEach(function(p){
-    p.step=0;setTag(p);p.bone.classList.remove('eaten');
-    Array.prototype.slice.call(p.lane.querySelectorAll('.paw')).forEach(function(e){e.remove()});
-  });
-  place(false);show('win',false);show('play',true);turn=0;over=false;nextQ();
-};
-$('back').onclick=function(){
-  show('stage',false);show('play',false);show('win',false);show('setup',true);
-  $('top').innerHTML='';buildSetup();
-};
-window.addEventListener('resize',function(){if(players.length&&!$('stage').classList.contains('hide'))place(false)});
+$('again').onclick=again;
+$('back').onclick=back;
+$('quit').onclick=back;
+window.addEventListener('resize',function(){if(players.length&&!over&&settings.mode!=='pong'&&!$('stage').classList.contains('hide'))place(false)});
 buildSetup();
 </script>
 </body>
